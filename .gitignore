@@ -1,0 +1,50 @@
+# 루트 폴더
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependency directories
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ecommerce-admin 폴더 안에서도 무시
+ecommerce-admin/logs
+ecommerce-admin/*.log
+ecommerce-admin/npm-debug.log*
+ecommerce-admin/yarn-debug.log*
+ecommerce-admin/yarn-error.log*
+ecommerce-admin/pnpm-debug.log*
+ecommerce-admin/lerna-debug.log*
+
+ecommerce-admin/node_modules
+ecommerce-admin/dist
+ecommerce-admin/dist-ssr
+ecommerce-admin/*.local
+
+ecommerce-admin/.vscode/*
+!ecommerce-admin/.vscode/extensions.json
+ecommerce-admin/.idea
+ecommerce-admin/.DS_Store
+ecommerce-admin/*.suo
+ecommerce-admin/*.ntvs*
+ecommerce-admin/*.njsproj
+ecommerce-admin/*.sln
+ecommerce-admin/*.sw?
