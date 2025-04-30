@@ -98,7 +98,7 @@ pipeline{
                     
                     // Docker 컨테이너 실행
                     echo "Starting Docker container '${containerName}' from image '${imageFullName}'..."
-                    sh "docker run -d -e TZ=Asia/Seoul -p 8080:8080 --name ${containerName} ${imageFullName}"
+                    sh "docker run -d -e TZ=Asia/Seoul -p 8888:8888 --name ${containerName} ${imageFullName}"
 
                     // 컨테이너 상태 확인
                     def containerId = sh(script: "docker ps -q -f name=${containerName}", returnStdout: true).trim()
