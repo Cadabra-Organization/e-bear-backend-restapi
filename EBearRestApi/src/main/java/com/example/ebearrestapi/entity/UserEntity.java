@@ -34,6 +34,8 @@ public class UserEntity {
     private String address;
     
     private String addressDetails;
+
+    private String authority;
     
     @Column(length = 20)
     private String mobile;
@@ -106,6 +108,16 @@ public class UserEntity {
     public boolean isSeller() {
         return role == Role.SELLER;
     }
-}
 
+    public void updateProfile(String userName, String email, String address, String mobile) {
+        this.userName = userName;
+        this.email = email;
+        this.address = address;
+        this.mobile = mobile;
+    }
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+}
 

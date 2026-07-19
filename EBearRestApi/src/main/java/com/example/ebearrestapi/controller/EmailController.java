@@ -24,7 +24,7 @@ public class EmailController {
 
     @PostMapping("/verify")
     public String verify(@RequestBody Map<String,String> body){
-        emailService.verify(body.get("email"), body.get("code"));
+        emailService.verify(body.get("email"), body.get("emailAuthCode"));
         return "인증 완료";
     }
 }
