@@ -15,7 +15,6 @@ public interface PgRoutingRuleRepository extends JpaRepository<PgRoutingRuleEnti
     @Query("SELECT r FROM PgRoutingRuleEntity r " +
             "JOIN FETCH r.pgProvider p " +
             "WHERE r.paymentType = :paymentType " +
-            "AND r.cardCompany = :cardCompany " +
             "AND p.isActive = true")
     List<PgRoutingRuleEntity> findAvailableRules(@Param("paymentType") PaymentType paymentType);
 }
