@@ -29,6 +29,8 @@ public class EmailService {
     // 인증코드 검증
     public void verify(String email, String code){
         if(!emailAuthStore.verifyCode(email, code)){
+            System.out.println("저장된 코드 = " + email);
+            System.out.println("입력 코드 = " + code);
             throw new RuntimeException("인증코드가 틀렸습니다.");
         }
     }

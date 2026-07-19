@@ -17,6 +17,7 @@ import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter
@@ -64,8 +65,10 @@ public class JwtToken {
                 .parseSignedClaims(token)
                 .getPayload();
 
-        Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
+        String authoritiesClaim = claims.get(AUTHORITIES_KEY, String.class);
+        Collection<? extends GrantedAuthority> authorities = authoritiesClaim == null || authoritiesClaim.isBlank()
+                ? List.of()
+                : Arrays.stream(authoritiesClaim.split(","))
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
@@ -98,6 +101,9 @@ public class JwtToken {
     public String resolveToken(HttpServletRequest request)
     {
         String returnValue = request.getHeader(JwtProperties.HEADER_ACCESS_STRING);
+        if (returnValue == null) {
+            returnValue = request.getHeader(JwtProperties.HEADER_STRING);
+        }
         if (returnValue != null && returnValue.startsWith(JwtProperties.TOKEN_PREFIX)) {
             return returnValue.substring(JwtProperties.TOKEN_PREFIX.length()).trim();
         }

@@ -17,7 +17,12 @@ public class UserDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
-        UserEntity user = (UserEntity) userRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException("User Not Found"));
+        UserEntity user = userRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException("User Not Found"));
+
+//        if (!user.isAdmin()) {
+//            throw new UsernameNotFoundException("관리자 계정이 아닙니다.");
+//        }
+
         return new UserDetail(user);
     }
 }
