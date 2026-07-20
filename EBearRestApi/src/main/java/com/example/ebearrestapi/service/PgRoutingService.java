@@ -20,7 +20,7 @@ public class PgRoutingService {
      * 사용자가 선택한 결제 정보(결제 수단, 카드사)를 기반으로
      * 수수료가 가장 낮고 활성화된 PG사를 찾아냅니다.
      */
-    public PgProvider determineBestPg(PaymentType method, String cardCompany) {
+    public PgProvider determineBestPg(PaymentType method) {
         // PG사 활성화 상태면서 사용자가 선택한 결제 수단과 카드사 조건에 맞는 라우팅 룰 리스트 조회
         List<PgRoutingRuleEntity> activeRules = pgRoutingRuleRepository.findAvailableRules(method);
 
