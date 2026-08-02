@@ -11,8 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatMessageResDto {
-    private boolean success;
+public class ChatListResDto {
     private String id;
     private String lastMessage;
     private LocalDateTime lastMessageTime;

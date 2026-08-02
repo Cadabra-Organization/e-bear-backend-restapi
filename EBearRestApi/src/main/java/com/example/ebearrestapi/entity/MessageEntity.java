@@ -19,6 +19,9 @@ public class MessageEntity extends BaseEntity {
     
     @Column(nullable = false, columnDefinition = "TEXT")
     private String message;
+
+    @Column(nullable = false)
+    private boolean isRead;
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -40,5 +43,9 @@ public class MessageEntity extends BaseEntity {
     // 비즈니스 로직
     public void markAsRead() {
         this.validate = Validate.CHECK;
+    }
+
+    public void updateRead() {
+        this.isRead = true;
     }
 }

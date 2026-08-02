@@ -48,7 +48,9 @@ public class MessageRoomService {
 
         return messageRoomEntityList.stream().map(item -> {
                     List<MessageEntity> messageEntityList = messageRepository.findByConsultation(item.getConsultaion());
-                    long notReadMessageCnt = messageEntityList.stream().filter(data -> data.getValidate().equals(Validate.UNCHECK)).count();
+                    long notReadMessageCnt = messageEntityList.stream()
+                            .filter(data -> !data.isRead())
+                            .count();
                     String message = messageEntityList.stream().max(Comparator.comparing(MessageEntity::getRegDate)).map(MessageEntity::getMessage).orElse("");
                     LocalDateTime messageDate = messageEntityList.stream().max(Comparator.comparing(MessageEntity::getRegDate)).map(MessageEntity::getRegDate).orElse(null);
                     return MessageRoomListDto.builder().id(item.getMessageRoomNo()).title(item.getMessageRoomNo() + "번방 - " + item.getUser().getUserName() + "님").message(message).notReadMessageCnt((int) notReadMessageCnt).messageDate(messageDate).build();
@@ -60,13 +62,38 @@ public class MessageRoomService {
         MessageRoomEntity messageRoom = messageRoomRepository.findById(chatMessageReqDto.getRoomId()).orElseThrow(() -> new RuntimeException("Not Found ChatRoom"));
         ConsultaionEntity consultaionEntity = messageRoom.getConsultaion();
         UserEntity user = userRepository.findById(chatMessageReqDto.getSenderId()).orElseThrow(() -> new RuntimeException("Not Found User"));
-        messageRepository.save(MessageEntity.builder().message(chatMessageReqDto.getContent()).messageRoom(messageRoom).consultation(consultaionEntity).user(user).build());
-        return ChatMessageResDto.builder().success(true).build();
+        MessageEntity message = messageRepository.save(MessageEntity.builder().message(chatMessageReqDto.getContent()).messageRoom(messageRoom).consultation(consultaionEntity).user(user).isRead(false).build());
+        int roomNotReadCount = messageRepository.findAllByIsReadAndMessageRoom(false, messageRoom).size();
+        return ChatMessageResDto.builder().success(true).id(messageRoom.getMessageRoomNo().toString()).lastMessage(message.getMessage()).lastMessageTime(message.getRegDate()).messageCount(roomNotReadCount).build();
     }
 
     public List<ChatMessage> findMessage(Long id) {
         MessageRoomEntity messageRoomEntity = messageRoomRepository.findById(id).orElseThrow(() -> new RuntimeException("Not Found Message"));
         List<MessageEntity> messageEntityList = messageRepository.findByConsultation(messageRoomEntity.getConsultaion());
         return messageEntityList.stream().map(item -> ChatMessage.builder().roomId(messageRoomEntity.getMessageRoomNo()).content(item.getMessage()).senderId(item.getUser().getUserNo()).regDate(item.getRegDate()).build()).toList();
+    }
+
+    @Transactional
+    public ChatListResDto markMessagesAsRead(Long roomId, Long userId) {
+        MessageRoomEntity messageRoom = messageRoomRepository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException("Not Found MessageRoom"));
+
+        messageRepository.findAllByIsReadAndMessageRoom(false, messageRoom)
+                .forEach(MessageEntity::updateRead);
+
+        List<MessageEntity> messageEntityList = messageRepository.findByConsultation(messageRoom.getConsultaion());
+        String lastMessage = messageEntityList.stream()
+                .max(Comparator.comparing(MessageEntity::getRegDate))
+                .map(MessageEntity::getMessage).orElse("");
+        LocalDateTime lastMessageTime = messageEntityList.stream()
+                .max(Comparator.comparing(MessageEntity::getRegDate))
+                .map(MessageEntity::getRegDate).orElse(null);
+
+        return ChatListResDto.builder()
+                .id(roomId.toString())
+                .lastMessage(lastMessage)
+                .lastMessageTime(lastMessageTime)
+                .messageCount(0)
+                .build();
     }
 }
