@@ -67,8 +67,8 @@ public class PaymentService {
         int safeFinalAmount = totalProductPrice - couponDiscount - usePoint;
 
         PgProvider determinedPg = pgRoutingService.determineBestPg(
-                paymentDto.getType(),   // 사용자가 고른 결제수단 (CARD, TRANSFER 등)
-                "ALL"                   // 특정 카드사 구분 없이
+                paymentDto.getType()   // 사용자가 고른 결제수단 (CARD, TRANSFER 등)
+//                "ALL"                   // 특정 카드사 구분 없이
         );
 
         // 결제 정보 생성 (포인트 등은 임시)
@@ -90,6 +90,7 @@ public class PaymentService {
 
     }
 
+    @Transactional
     public void confirmPayment(PaymentConfirmDto paymentConfirmDto) {
         // 사전 검증 (DB 조회 트랜잭션 분리)
         PaymentEntity payment = paymentTransactionService.preValidate(paymentConfirmDto);
