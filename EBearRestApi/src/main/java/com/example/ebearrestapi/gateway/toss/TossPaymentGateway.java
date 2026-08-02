@@ -4,34 +4,24 @@ import com.example.ebearrestapi.dto.request.PaymentConfirmDto;
 import com.example.ebearrestapi.dto.request.TossCancelDto;
 import com.example.ebearrestapi.dto.request.TossConfirmDto;
 import com.example.ebearrestapi.etc.PgProvider;
+import com.example.ebearrestapi.exception.PaymentException;
 import com.example.ebearrestapi.gateway.PaymentGateway;
 import com.example.ebearrestapi.gateway.dto.PaymentResponseDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
+import feign.RetryableException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestTemplate;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class TossPaymentGateway implements PaymentGateway {
 
-    @Value("${toss.api.secret-key}")
-    private String secretKey;
-
-    private final RestTemplate restTemplate;
+    private final TossPaymentClient tossPaymentClient;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -51,31 +41,30 @@ public class TossPaymentGateway implements PaymentGateway {
                 .amount(confirmDto.getAmount())
                 .build();
 
-        HttpHeaders headers = createHeaders();
-        HttpEntity<TossConfirmDto> entity = new HttpEntity<>(tossConfirmDto, headers);
-
+        String responseBody;
         try {
-            ResponseEntity<String> response = restTemplate.postForEntity(
-                    "https://api.tosspayments.com/v1/payments/confirm", entity, String.class);
-            JsonNode body = objectMapper.readTree(response.getBody());
+            responseBody = tossPaymentClient.confirm(tossConfirmDto);
+        } catch (RetryableException e) {
+            // 응답 자체를 못 받은 경우(커넥션/타임아웃)
+            log.error("토스 승인 에러 응답: {}", e.contentUTF8());
+            throw new PaymentException("NETWORK_ERROR", "결제 서버와 통신할 수 없습니다.");
+        } catch (FeignException e) {
+            // 토스가 실제로 에러 응답을 내려준 경우 (ex. 승인 거절 등)
+            log.error("토스 승인 에러 응답: {}", e.contentUTF8());
+            throw new PaymentException("PG_DECLINED", e.contentUTF8());
+        }
+
+        try{
+            JsonNode body = objectMapper.readTree(responseBody);
 
             return PaymentResponseDto.builder()
                     .isSuccess("DONE".equals(body.get("status").asText()))
                     .transactionId(body.get("paymentKey").asText())
-                    .rawResponse(response.getBody())
-                    .build();
-        } catch (HttpStatusCodeException e) {
-            log.error("토스 승인 에러 응답: {}", e.getResponseBodyAsString());
-            return PaymentResponseDto.builder()
-                    .isSuccess(false)
-                    .errorMessage(e.getResponseBodyAsString())
+                    .rawResponse(responseBody)
                     .build();
         } catch (JsonProcessingException e) {
-            log.error("토스 통신 중 알 수 없는 에러 발생", e);
-            return PaymentResponseDto.builder()
-                    .isSuccess(false)
-                    .errorMessage("결제 서버 통신 에러")
-                    .build();
+            log.error("토스 응답 파싱 실패", e);
+            throw new PaymentException("PG_RESPONSE_PARSE_ERROR", "결제 서버 응답을 해석할 수 없습니다");
         }
     }
 
@@ -86,26 +75,14 @@ public class TossPaymentGateway implements PaymentGateway {
     public void cancel(String paymentKey, String reason) {
         log.info("토스 결제 취소 요청: paymentKey={}", paymentKey);
 
-        String url = "https://api.tosspayments.com/v1/payments/" + paymentKey + "/cancel";
         TossCancelDto cancelDto = TossCancelDto.builder().cancelReason(reason).build();
 
-        HttpEntity<TossCancelDto> entity = new HttpEntity<>(cancelDto, createHeaders());
-
         try {
-            restTemplate.postForEntity(url, entity, String.class);
-        } catch (Exception e) {
-            log.error("토스 결제 취소 실패 : paymentKey={}, reason={}", paymentKey, reason);
+            tossPaymentClient.cancel(paymentKey, cancelDto);
+        } catch (FeignException e) {
+            log.error("토스 결제 취소 실패 : paymentKey={}, reason={}", paymentKey, reason, e);
+            throw new PaymentException("PG_CANCEL_FAILED", "PG사 결제 취소에 실패했습니다.");
         }
     }
 
-    /**
-     * 공통 헤더 생성(Base63 인증 포함)
-     */
-    private HttpHeaders createHeaders() {
-        String encodedAuthKey = Base64.getEncoder().encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBasicAuth(encodedAuthKey);
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return headers;
-    }
 }

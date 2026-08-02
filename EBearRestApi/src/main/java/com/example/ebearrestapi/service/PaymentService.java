@@ -103,24 +103,23 @@ public class PaymentService {
         try {
             // 해당 PG사 서버로 외부 API 호출 위임
             gatewayResponse = gateway.confirm(paymentConfirmDto);
-        } catch (RestClientException e) {
-            // 타임아웃 / 네트워크 장애 등
-            log.error("PG confirm API network timeout! orderId: {}", paymentConfirmDto.getOrderId(), e);
+        } catch (PaymentException e) {
+            if (!"NETWORK_ERROR".equals(e.getErrorCode())) {
+                // 토스가 명확히 거절 응답을 준 경우 - 승인 자체가 안 됐으므로 취소 불필요
+                paymentTransactionService.failPayment(paymentConfirmDto.getOrderId());
+                throw e;
+            }
+
+            // 응답을 못 받은 경우 - 토스 쪽엔 승인이 실제로 들어갔을 수도 있으니 안전하게 망취소
+            log.error("PG 확인 API 네트워크 시간 초과! orderId: {}", paymentConfirmDto.getOrderId(), e);
             try {
-                // 망 취소(Network Cancel) 호출
                 gateway.cancel(paymentConfirmDto.getPaymentKey(), "네트워크 타임아웃으로 인한 자동 취소");
             } catch (Exception cancelEx) {
-                log.error("CRITICAL ERROR: Failed to cancel toss payment after confirm API timeout! orderId: {}", paymentConfirmDto.getOrderId(), cancelEx);
+                log.error("API 확인 시간 초과 후 결제 취소 실패! orderId: {}", paymentConfirmDto.getOrderId(), cancelEx);
             }
             paymentTransactionService.failPayment(paymentConfirmDto.getOrderId());
-            throw new PaymentException("NETWORK_ERROR", "결제 서버와의 네트워크 오류로 인해 결제가 취소되었습니다.");
-        }
+            throw e;
 
-        // PG사 결과 공통 검증
-        if (gatewayResponse == null || !gatewayResponse.isSuccess()) {
-            paymentTransactionService.failPayment(paymentConfirmDto.getOrderId());
-            String errorMsg = (gatewayResponse != null) ? gatewayResponse.getErrorMessage() : "알 수 없는 승인 실패";
-            throw new PaymentException("UNKNOWN_PAYMENT_STATUS", "결제가 승인되지 않았습니다. 사유: " + errorMsg);
         }
 
         // 결제 완료 처리 및 포인트/쿠폰 차감
@@ -133,7 +132,7 @@ public class PaymentService {
                 paymentTransactionService.failPayment(paymentConfirmDto.getOrderId());
             } catch (Exception cancelEx) {
                 // 결제 취소 API마저 실패한 경우
-                 log.error("CRITICAL ERROR: Toss Cancel API failed after DB Complete Error! orderId: " + paymentConfirmDto.getOrderId(), cancelEx);
+                 log.error("데이터베이스 완료 오류 발생 후 Toss Cancel API 실행 실패! orderId: " + paymentConfirmDto.getOrderId(), cancelEx);
             }
             throw e;
         }
