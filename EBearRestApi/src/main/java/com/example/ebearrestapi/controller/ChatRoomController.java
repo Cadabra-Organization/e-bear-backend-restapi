@@ -59,6 +59,6 @@ public class ChatRoomController {
             log.error("Socket 서버로 읽음 알림 전송 실패", e);
         }
 
-        return ResponseEntity.ok(true);
+        return ResponseEntity.status(HttpStatus.OK).body(true);
     }
 }
