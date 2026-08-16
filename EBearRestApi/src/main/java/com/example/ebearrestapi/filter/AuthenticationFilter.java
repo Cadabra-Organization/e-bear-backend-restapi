@@ -1,10 +1,8 @@
 package com.example.ebearrestapi.filter;
 
 import com.example.ebearrestapi.dto.request.UserDto;
-import com.example.ebearrestapi.etc.Role;
 import com.example.ebearrestapi.utils.JwtProperties;
 import com.example.ebearrestapi.utils.JwtToken;
-import com.example.ebearrestapi.vo.UserDetail;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -22,16 +20,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 @RequiredArgsConstructor
 @Slf4j
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-    private static final Set<String> ADMIN_PAGE_ORIGINS = Set.of(
-            "http://localhost:5173",
-            "http://127.0.0.1:5173"
-    );
-
     private  final JwtToken jwtToken;
     private  final AuthenticationManager authenticationManager;
 
@@ -59,13 +51,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
-        UserDetail principalUserDetails = (UserDetail)authResult.getPrincipal();
-
         String access = jwtToken.createToken(authResult);
-        if (isAdminPageOrigin(request) && principalUserDetails.getRole() != Role.ADMIN) {
-            setFailResponse(response, "관리자 페이지는 관리자 계정만 접속 가능합니다.");
-            return;
-        }
 
         response.addHeader(JwtProperties.HEADER_ACCESS_STRING, JwtProperties.TOKEN_PREFIX + access);
         setSuccessResponse(response, "로그인 성공");
@@ -105,15 +91,5 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         body.put("message", message);
 
         response.getWriter().print(objectMapper.writeValueAsString(body));
-    }
-
-    private boolean isAdminPageOrigin(HttpServletRequest request) {
-        String origin = request.getHeader("Origin");
-        if (origin != null) {
-            return ADMIN_PAGE_ORIGINS.contains(origin);
-        }
-
-        String referer = request.getHeader("Referer");
-        return referer != null && ADMIN_PAGE_ORIGINS.stream().anyMatch(referer::startsWith);
     }
 }
