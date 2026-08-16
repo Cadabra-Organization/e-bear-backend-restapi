@@ -12,14 +12,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReportAdminDetailDto {
-    private Long inquiryNo;
+    private Long reportNo;
     private String productName;
     private boolean answered;
     private String customerName;
     private String customerId;
-    private LocalDateTime inquiryRegDt;
+    private LocalDateTime reportRegDt;
     private String title;
-    private String inquiryContent;
+    private String reportContent;
     private String answerContent;
     private LocalDateTime respondDt;
     private String responder;

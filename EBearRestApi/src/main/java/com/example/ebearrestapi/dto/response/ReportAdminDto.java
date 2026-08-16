@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 public class ReportAdminDto {
-    private Long inquiryNo;
+    private Long reportNo;
     private String productName;
     private String title;
     private String customer;
