@@ -3,14 +3,13 @@ package com.example.ebearrestapi.gateway.toss;
 import feign.RequestInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-//@Configuration
-public class TossFeignConfig { //인증 헤더 인터셉터
+public class TossFeignConfig {
+
     @Value("${toss.api.secret-key}")
     private String secretKey;
 
@@ -20,7 +19,7 @@ public class TossFeignConfig { //인증 헤더 인터셉터
             String encodedAuthKey = Base64.getEncoder()
                     .encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
             requestTemplate.header("Authorization", "Basic " + encodedAuthKey);
-            requestTemplate.header("content-Type", MediaType.APPLICATION_JSON_VALUE);
+            requestTemplate.header("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         };
     }
 }
