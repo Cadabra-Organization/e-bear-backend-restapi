@@ -14,6 +14,7 @@ import java.util.List;
 @Builder
 public class ProductDetailResult {
     private Long productId;
+    private Long boardId;
     private String productName;
     private String thumbnail;
     private String content;

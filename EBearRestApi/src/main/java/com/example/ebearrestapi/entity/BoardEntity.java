@@ -36,10 +36,6 @@ public class BoardEntity extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "userNo", nullable = false)
     private UserEntity user;
-
-    @OneToMany(mappedBy = "board")
-    @Builder.Default
-    private List<EventEntity> eventList = new ArrayList<>();
     
     @OneToMany(mappedBy = "board")
     @Builder.Default
