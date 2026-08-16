@@ -28,8 +28,8 @@ import java.util.Set;
 @Slf4j
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private static final Set<String> ADMIN_PAGE_ORIGINS = Set.of(
-            "http://localhost:5174",
-            "http://127.0.0.1:5174"
+            "http://localhost:5173",
+            "http://127.0.0.1:5173"
     );
 
     private  final JwtToken jwtToken;
