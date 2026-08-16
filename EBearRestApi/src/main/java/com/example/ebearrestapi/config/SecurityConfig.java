@@ -38,6 +38,7 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers("/auth/**", "/v3/api-docs/**","/swagger-ui/**","/swagger-ui.html", "/h2-console/**", "/api/payments/**", "/order/**", "/signup", "/login","/email/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

@@ -32,10 +32,8 @@ public class UserEntity {
     private String post;
     
     private String address;
-    
-    private String addressDetails;
 
-    private String authority;
+    private String addressDetails;
     
     @Column(length = 20)
     private String mobile;
