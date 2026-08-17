@@ -26,7 +26,7 @@ import java.util.List;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final JWTConfig  jwtConfig;
+    private final JWTConfig jwtConfig;
     private final UserDetailService userDetailService;
 
     @Bean
@@ -37,7 +37,9 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("/actuator/**", "/auth/**", "/v3/api-docs/**","/swagger-ui/**","/swagger-ui.html", "/h2-console/**", "/signup", "/login","/auth/**","/email/**", "/notification/**", "/product/**", "/file/**", "/category/**", "/etc/**", "/cart/**", "inquiry/**").permitAll()
+                        .requestMatchers("/actuator/**", "/auth/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/h2-console/**", "/signup", "/login", "/email/**", "/notification/**", "/product/**", "/file/**", "/category/**", "/etc/**", "/cart/**", "/inquiry/**", "/chat/message", "/chat/rooms/**").permitAll()
+                        .requestMatchers("/api/seller/settlements/**").hasAnyRole("SELLER", "ADMIN")
+                        .requestMatchers("/api/admin/settlements/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -57,7 +59,6 @@ public class SecurityConfig {
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");
         configuration.setAllowCredentials(true);
-
         configuration.setExposedHeaders(List.of("ACCESS_TOKEN"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -68,10 +69,8 @@ public class SecurityConfig {
     @Bean
     protected DaoAuthenticationProvider daoAuthenticationProvider() throws Exception {
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-
         daoAuthenticationProvider.setUserDetailsService(userDetailService);
         daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
-
         return daoAuthenticationProvider;
     }
 
@@ -81,8 +80,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    protected AuthenticationManager authenticationManager() throws Exception {//2 - AuthenticationManager 등록
-        DaoAuthenticationProvider provider = daoAuthenticationProvider();//DaoAuthenticationProvider 사용
+    public AuthenticationManager authenticationManager() throws Exception {
+        DaoAuthenticationProvider provider = daoAuthenticationProvider();
         return new ProviderManager(provider);
     }
 }

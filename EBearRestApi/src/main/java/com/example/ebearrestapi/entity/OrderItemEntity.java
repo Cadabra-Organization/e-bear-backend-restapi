@@ -13,7 +13,6 @@ import lombok.*;
 @IdClass(OrderItemId.class)
 public class OrderItemEntity {
     @Id
-    //@GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderItemNo;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -34,4 +33,12 @@ public class OrderItemEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userNo")
     private UserEntity user;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean isSettled = false;
+
+    public void markAsSettled() {
+        this.isSettled = true;
+    }
 }
