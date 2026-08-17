@@ -124,6 +124,7 @@ public class ProductService {
 
         return ProductDetailResult.builder()
                 .productId(product.getProductNo())
+                .boardId(board.getBoardNo())
                 .productName(product.getProductName())
                 .thumbnail(thumbnailFile == null ? null : thumbnailFile.getFileLocation() + thumbnailFile.getSaveFileName())
                 .content(board.getContent())
@@ -229,5 +230,9 @@ public class ProductService {
             ProductEntity product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
             product.getBoard().setDelYN("Y");
         }
+    }
+
+    public ProductEntity findByProductId(Long productId) {
+        return  productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
     }
 }
