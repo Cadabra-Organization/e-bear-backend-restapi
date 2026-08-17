@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface WishRepository extends JpaRepository<WishListEntity, Long> {
-    @EntityGraph(attributePaths = {"product", "product.user"})
+    @EntityGraph(attributePaths = {"product", "product.user", "product.fileList", "product.productOptionList", "product.user.file"})
     @Query("SELECT w FROM WishListEntity w " +
             "WHERE w.user.userId = :userId " +
             "AND w.wishListNo < :cursor " +

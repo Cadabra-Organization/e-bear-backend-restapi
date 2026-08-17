@@ -10,6 +10,7 @@ import com.example.ebearrestapi.repository.ProductRepository;
 import com.example.ebearrestapi.repository.UserRepository;
 import com.example.ebearrestapi.repository.WishRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -62,7 +63,11 @@ public class WishService {
                 .product(product)
                 .build();
 
-        wishRepository.save(wishListEntity);
+        try {
+            wishRepository.save(wishListEntity);
+        } catch (DataIntegrityViolationException e) {
+            // 동시 요청으로 이미 저장된 경우
+        }
     }
 
     @Transactional
@@ -89,7 +94,7 @@ public class WishService {
         Integer price = product.getProductOptionList().stream()
                 .map(ProductOptionEntity::getProductOptionPrice)
                 .min(Integer::compareTo)
-                .orElse(0);
+                .orElse(null);
 
         FileEntity sellerFile = seller.getFile();
 
