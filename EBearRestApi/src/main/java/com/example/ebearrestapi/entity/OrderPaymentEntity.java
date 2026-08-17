@@ -2,22 +2,23 @@ package com.example.ebearrestapi.entity;
 
 import com.example.ebearrestapi.etc.OrderStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
+@Table(name = "ORDER_PAYMENT")
 @Getter
-@SuperBuilder
-@Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "order_type")
+@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class OrderPaymentEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long orderPaymentId;
+    private String orderPaymentId;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
@@ -26,6 +27,25 @@ public class OrderPaymentEntity {
     private String tel;
     private String email;
     private String deliveryRequired;
+
+    @Builder.Default
+    private boolean delYn = false;
+
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "userNo", nullable = false)
+    private UserEntity user;
+
+    @OneToMany(mappedBy = "orderPayment", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<PaymentEntity> paymentList = new ArrayList<>();
 
     public void updateDeliveryInfo(String address, String tel, String email, String deliveryRequired) {
         this.deliveryRequired = deliveryRequired;

@@ -1,5 +1,6 @@
 package com.example.ebearrestapi.utils;
 
+import com.example.ebearrestapi.service.UserDetailService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -11,6 +12,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
@@ -27,7 +30,6 @@ public class JwtToken {
 
     protected final String secret;
     protected final long tokenValidityInMilliseconds;
-
     protected Key key;
 
     public JwtToken(String secret, long tokenValidityInSeconds) {
@@ -69,6 +71,7 @@ public class JwtToken {
         Collection<? extends GrantedAuthority> authorities = authoritiesClaim == null || authoritiesClaim.isBlank()
                 ? List.of()
                 : Arrays.stream(authoritiesClaim.split(","))
+                        .filter(auth -> auth != null && !auth.trim().isEmpty())
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 

@@ -2,6 +2,7 @@ package com.example.ebearrestapi.entity;
 
 import com.example.ebearrestapi.etc.PaymentStatus;
 import com.example.ebearrestapi.etc.PaymentType;
+import com.example.ebearrestapi.etc.PgProvider;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,10 +27,6 @@ public class PaymentEntity extends BaseEntity {
     @Column(length = 200, unique = true)
     private String paymentKey;
 
-    // 주문번호
-    @Column(nullable = false, unique = true)
-    private String orderId;
-
     // 결제 상태 (READY, DONE, CANCELED 등)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -39,9 +36,28 @@ public class PaymentEntity extends BaseEntity {
     @Column(nullable = false)
     private PaymentType paymentType;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PgProvider pgProvider; // 서버단에서 어떤 pg사를 이용해야 되는지 결정
+
     // 실제 결제 승인 일시 (토스 API의 approvedAt 값)
     private LocalDateTime approvedAt;
-    
+
+    // 최종 결제 금액
     @Column(nullable = false)
     private Integer paymentAmount;
+
+    // 사용할 포인트 (예: 5000)
+    // 나중에 실제 가지고 있는 포인트랑 비교할거임
+    @Column(nullable = false)
+    private Integer usedPoint;
+
+    // 사용할 쿠폰 번호 (예: 12)
+    // 사용자가 실제 가지고 있는 쿠폰인지 확인
+    @Column
+    private Long usedCouponId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "orderPaymentId") // DB의 외래키 컬럼명
+    private OrderPaymentEntity orderPayment;
 }

@@ -1,11 +1,14 @@
 package com.example.ebearrestapi.config;
 
+import com.example.ebearrestapi.service.UserDetailService;
 import com.example.ebearrestapi.utils.JwtToken;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@RequiredArgsConstructor
 public class JWTConfig {
     @Value("${jwt.secret}")
     private String accessTokenSecret;

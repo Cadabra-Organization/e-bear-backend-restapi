@@ -1,5 +1,6 @@
 package com.example.ebearrestapi.entity;
 
+import com.example.ebearrestapi.etc.FileType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,4 +29,7 @@ public class FileEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "productNo", nullable = false)
     private ProductEntity product;
+
+    @Enumerated(EnumType.STRING)
+    private FileType fileType;
 }

@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class OrderResultDto {
+    private String orderPaymentId;
 }
