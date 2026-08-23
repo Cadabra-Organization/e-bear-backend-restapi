@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
-
 public interface UserRepository extends JpaRepository<UserEntity,Long> {
     Optional<UserEntity> findByUserId(String userId);
 

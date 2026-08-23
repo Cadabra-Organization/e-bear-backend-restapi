@@ -3,7 +3,6 @@ package com.example.ebearrestapi.filter;
 import com.example.ebearrestapi.dto.request.UserDto;
 import com.example.ebearrestapi.utils.JwtProperties;
 import com.example.ebearrestapi.utils.JwtToken;
-import com.example.ebearrestapi.vo.UserDetail;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -52,9 +51,6 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
-        UserDetail principalUserDetails = (UserDetail)authResult.getPrincipal();
-
-        String username = principalUserDetails.getUsername();
         String access = jwtToken.createToken(authResult);
 
         response.addHeader(JwtProperties.HEADER_ACCESS_STRING, JwtProperties.TOKEN_PREFIX + access);

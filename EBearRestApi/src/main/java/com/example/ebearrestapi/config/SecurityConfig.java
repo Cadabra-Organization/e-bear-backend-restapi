@@ -37,6 +37,8 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((authorize) -> authorize
+                        .requestMatchers("/auth/**", "/v3/api-docs/**","/swagger-ui/**","/swagger-ui.html", "/h2-console/**", "/api/payments/**", "/order/**", "/signup", "/login","/email/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/actuator/**", "/auth/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/h2-console/**", "/signup", "/login", "/email/**", "/notification/**", "/product/**", "/file/**", "/category/**", "/etc/**", "/cart/**", "/inquiry/**", "/chat/message", "/chat/rooms/**").permitAll()
                         .requestMatchers("/api/seller/settlements/**").hasAnyRole("SELLER", "ADMIN")
                         .requestMatchers("/api/admin/settlements/**").hasRole("ADMIN")
@@ -59,6 +61,8 @@ public class SecurityConfig {
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");
         configuration.setAllowCredentials(true);
+        configuration.setExposedHeaders(List.of("ACCESS_TOKEN"));
+
         configuration.setExposedHeaders(List.of("ACCESS_TOKEN"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

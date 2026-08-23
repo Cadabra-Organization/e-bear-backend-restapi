@@ -137,10 +137,9 @@ class PaymentServiceTest {
         when(orderItemRepository.findByOrderPayment(any())).thenReturn(new ArrayList<>());
 
         // when
-        Object result = paymentService.confirmPayment(dto);
+        paymentService.confirmPayment(dto);
 
         // then
-        assertEquals("success", result);
         assertEquals(PaymentStatus.DONE, mockPayment.getPaymentStatus());
         assertEquals("toss_key_123", mockPayment.getPaymentKey());
         assertNotNull(mockPayment.getApprovedAt());

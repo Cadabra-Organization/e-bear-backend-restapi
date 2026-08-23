@@ -1,9 +1,11 @@
 package com.example.ebearrestapi.vo;
 
 import com.example.ebearrestapi.entity.UserEntity;
+import com.example.ebearrestapi.etc.Role;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
@@ -36,7 +38,7 @@ public class UserDetail implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
     }
 
     @Override
@@ -47,5 +49,9 @@ public class UserDetail implements UserDetails {
     @Override
     public String getUsername() {
         return user.getUserId();
+    }
+
+    public Role getRole() {
+        return user.getRole();
     }
 }

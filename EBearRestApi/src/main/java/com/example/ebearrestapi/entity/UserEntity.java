@@ -32,7 +32,7 @@ public class UserEntity {
     private String post;
     
     private String address;
-    
+
     private String addressDetails;
     
     @Column(length = 20)
@@ -110,6 +110,15 @@ public class UserEntity {
     public boolean isSeller() {
         return role == Role.SELLER;
     }
+
+    public void updateProfile(String userName, String email, String address, String mobile) {
+        this.userName = userName;
+        this.email = email;
+        this.address = address;
+        this.mobile = mobile;
+    }
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
 }
-
-

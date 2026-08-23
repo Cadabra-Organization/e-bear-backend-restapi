@@ -1,11 +1,14 @@
 package com.example.ebearrestapi.service;
 
 import com.example.ebearrestapi.dto.request.SignupDto;
+import com.example.ebearrestapi.dto.request.UserProfileUpdateRequest;
+import com.example.ebearrestapi.dto.response.UserProfileResponse;
 import com.example.ebearrestapi.entity.UserEntity;
 import com.example.ebearrestapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,5 +32,31 @@ public class UserService {
 
         UserEntity user = dto.toEntity(passwordEncoder.encode(dto.getPw()));
         return userRepository.save(user);
+    }
+
+    public UserProfileResponse getProfile(String userId) {
+        UserEntity user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User Not Found"));
+
+        return UserProfileResponse.from(user);
+    }
+
+    @Transactional
+    public UserProfileResponse updateProfile(String userId, UserProfileUpdateRequest request) {
+        UserEntity user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User Not Found"));
+
+        user.updateProfile(
+                request.getName(),
+                request.getEmail(),
+                request.getAddress(),
+                request.getPhone()
+        );
+
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.updatePassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        return UserProfileResponse.from(user);
     }
 }
