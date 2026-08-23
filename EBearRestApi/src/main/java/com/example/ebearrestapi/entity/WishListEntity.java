@@ -4,7 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "WISH_LIST")
+@Table(name = "WISH_LIST",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_wish_user_product",
+                columnNames = {"userNo", "productNo"}
+        )) //중복 체크를 위한 unique
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
